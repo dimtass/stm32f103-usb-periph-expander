@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(stm32f103_micro-kernel)
+project(stm32f103_usb-peripheral-expander)
 
 set(PP_DEFINES " -DSTM32F1 -DSTM32F103C8Tx -DSTM32 -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD")
 set(PP_DEFINES "${PP_DEFINES} -DIVECT_TAB_OFFSET=0x0")

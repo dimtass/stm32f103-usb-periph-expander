@@ -111,7 +111,7 @@ int _write(int file, char *ptr, int len)
 	return len;
 }
 
-caddr_t _sbrk(int incr)
+caddr_t __attribute__ ((used)) _sbrk(int incr)
 {
 	extern char end asm("end");
 	static char *heap_end;

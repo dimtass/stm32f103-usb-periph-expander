@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(micro-kernel)
+project(usb-peripheral-expander)
 
 set(COMPILER_OPTIONS "-Wall -Werror")
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${COMPILER_OPTIONS} -std=c11")
@@ -41,7 +41,7 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL "arm-none-eabi")
     set(CMAKE_CXX_FLAGS_STM "${CMAKE_CXX_FLAGS} ${COMPILER_OPTIONS_STM}")
 
     # set compiler optimisations
-    set(COMPILER_OPTIMISATION "-g -O3")
+    set(COMPILER_OPTIMISATION "-g -O3 -flto")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS_STM}   ${COMPILER_OPTIMISATION}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_STM} ${COMPILER_OPTIMISATION}")
 
