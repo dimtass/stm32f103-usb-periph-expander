@@ -70,3 +70,9 @@ These are the peripherals that are not implemented yet
 
 #### GUI
 A gui application that exports these peripherals to the OS
+
+## FW details
+* `CMSIS version`: 5.3.0
+* `StdPeriph Library version`: 3.6.1
+* `STM3 USB Driver version`: 4.1.0
+
