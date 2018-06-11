@@ -102,17 +102,3 @@ add_custom_target ( ${PROJECT_NAME}.bin ALL
 
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
     COMMAND ${CMAKE_SIZE} --format=berkeley "${PROJECT_NAME}.elf")
-
-# debug target
-add_custom_target ( debug-${PROJECT_NAME}
-    DEPENDS ${PROJECT_NAME}.elf 
-    COMMAND ${CMAKE_GDB} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.elf
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Starting gdb for ${PROJECT_NAME}"
-)
-
-install(
-    PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
-    COMPONENT surface
-    DESTINATION opt/midas/resources/hermes/
-)
