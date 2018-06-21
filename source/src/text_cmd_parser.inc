@@ -2,6 +2,7 @@ enum {
 	ERR_INDEX = 1,
 	ERR_LEN,
 	ERR_UART_NE,
+	ERR_DEV_NE,
 };
 
 #define GET_NEXT_PARAM(BUFFER) \
@@ -12,23 +13,6 @@ enum {
 		TRACEL(TRACE_LEVEL_PARSER,("PARAM: %s\n", BUFFER)); \
 		idx += tmp_idx
 
-uint8_t strbin2i(char* s)
-{
-	unsigned char *p = s;
-	unsigned int   r = 0;
-	unsigned char  c;
-
-	while (p && *p ) {
-		c = *p++;
-		if (c == '0')
-			r = (r<<1);		// shift 1 bit left and add 0
-		else if (c == '1')
-			r = (r<<1) + 1;	// shift 1 bit left and add 1
-		else
-			break;	// bail on oinvalid character
-	}
-	return (uint8_t)r;
-}
 
 int find_char_index(uint8_t * buffer, size_t bufferlen, char find)
 {
@@ -99,7 +83,36 @@ int led_parser(uint8_t *buffer, size_t bufferlen, char ** resp)
 		}
 	}
 	else if (!strncmp(tmp, "GET", 3)) {
-
+		if (!exists) {
+			err = ERR_DEV_NE;
+			goto exit;
+		}
+		else {
+			struct dev_led * led = (struct dev_led*)dev->data;
+			char tmpstr1[100];
+			char tmpstr2[NAME_STR_LENGTH];
+			/* device */
+			strcpy(tmpstr1, "LED:");
+			/* name */
+			strcat(tmpstr1, dev->name);
+			strcat(tmpstr1, ",GPIO");
+			/* port */
+			tmpstr2[0] = port_to_char(led->port);
+			tmpstr2[1] = 0;
+			strcat(tmpstr1, tmpstr2);
+			strcat(tmpstr1, ",");
+			/* pin */
+			sprintf(tmpstr2, "%d", pin_to_uint(led->pin));
+			strcat(tmpstr1, tmpstr2);
+			strcat(tmpstr1, ",");
+			/* pattern */
+			u82strbin(led->pattern, tmpstr2);
+			strcat(tmpstr1, tmpstr2);
+			/* newline */
+			strcat(tmpstr1, "\n");
+			
+			TRACEL(TRACE_LEVEL_PARSER,("%s\n",tmpstr1));
+		}
 	}
 
 exit:

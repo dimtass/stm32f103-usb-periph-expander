@@ -81,3 +81,34 @@ uint8_t pin_to_uint(uint16_t pin)
 	}
 	return upin-1;
 }
+
+
+uint8_t strbin2i(char* s)
+{
+	unsigned char *p = s;
+	unsigned int   r = 0;
+	unsigned char  c;
+
+	while (p && *p ) {
+		c = *p++;
+		if (c == '0')
+			r = (r<<1);		// shift 1 bit left and add 0
+		else if (c == '1')
+			r = (r<<1) + 1;	// shift 1 bit left and add 1
+		else
+			break;	// bail on oinvalid character
+	}
+	return (uint8_t)r;
+}
+
+
+void u82strbin(uint8_t num, char* s)
+{
+	int i = 0;
+	for (i=0; i<8; i++) {
+		if ((num >> (7-i)) & 1) s[i] = '1';
+		else s[i] = '0';
+	}
+	s[i] = 0;
+	TRACE(("bin:%s\n", s));
+}

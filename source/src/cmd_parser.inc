@@ -19,12 +19,12 @@ enum en_cmd_parser_resp {
 
 void usb_0_rx_parser(uint8_t * recv_buffer, uint16_t recv_len)
 {
-	TRACE(TRACE_LEVEL_PARSER,("USB0_recv: %d\n", recv_len));
+	TRACE(("USB0_recv: %d\n", recv_len));
 	uint8_t * resp_buff_p = NULL;
 	int resp_len = cmd_parser(recv_buffer, recv_len, &resp_buff_p);
 	if (resp_len && resp_buff_p) {
 		USB_dev_send(&usb_comm_0, resp_buff_p, resp_len);
-		TRACE(TRACE_LEVEL_PARSER,("USB0_send: %d\n", resp_len));
+		TRACE(("USB0_send: %d\n", resp_len));
 	}
 	/* clean up */
 	if (resp_buff_p) {
@@ -37,9 +37,9 @@ void usb_0_rx_parser(uint8_t * recv_buffer, uint16_t recv_len)
 void usb_1_rx_parser(uint8_t * recv_buffer, uint16_t recv_len)
 {
 	int resp_len = 0;
-	TRACE(TRACE_LEVEL_PARSER,("USB1: %s\n", recv_buffer));
-	TRACE(TRACE_LEVEL_PARSER,("USB1_recv: %d\n", recv_len));
-	TRACE(TRACE_LEVEL_PARSER,("USB1_send: %d\n", resp_len));
+	TRACE(("USB1: %s\n", recv_buffer));
+	TRACE(("USB1_recv: %d\n", recv_len));
+	TRACE(("USB1_send: %d\n", resp_len));
 }
 
 
@@ -96,7 +96,7 @@ uint16_t cmd_create_resp(uint8_t ** buffer_p, enum en_comm_cmd cmd,
 {
 	*buffer_p = (uint8_t*)malloc(sizeof(struct comm_header) + additional_data_size);
 	if (!*buffer_p) {
-		TRACE(TRACE_LEVEL_PARSER,("malloc failed\n"));
+		TRACE(("malloc failed\n"));
 		return 0;
 	}
 
@@ -747,11 +747,11 @@ void test_cmd_parser(char * test_name)
 
 		if (resp) {
 			struct comm_header * header = (struct comm_header *) resp;
-//			TRACE(TRACE_LEVEL_PARSER,("resp_len: %d\n", resp_len));
-//			TRACE(TRACE_LEVEL_PARSER,("H->preamble: %d\n", header->preamble));
-//			TRACE(TRACE_LEVEL_PARSER,("H->length: %d\n", header->length));
-//			TRACE(TRACE_LEVEL_PARSER,("H->cmd: %d\n", header->cmd));
-			TRACE(TRACE_LEVEL_PARSER,("H->data.resp: %d\n", header->data.resp));
+//			TRACE(("resp_len: %d\n", resp_len));
+//			TRACE(("H->preamble: %d\n", header->preamble));
+//			TRACE(("H->length: %d\n", header->length));
+//			TRACE(("H->cmd: %d\n", header->cmd));
+			TRACE(("H->data.resp: %d\n", header->data.resp));
 			free(resp);
 		}
 
@@ -774,11 +774,11 @@ void test_cmd_parser(char * test_name)
 
 		if (resp) {
 			struct comm_header * header = (struct comm_header *) resp;
-//			TRACE(TRACE_LEVEL_PARSER,("resp_len: %d\n", resp_len));
-//			TRACE(TRACE_LEVEL_PARSER,("H->preamble: %d\n", header->preamble));
-//			TRACE(TRACE_LEVEL_PARSER,("H->length: %d\n", header->length));
-//			TRACE(TRACE_LEVEL_PARSER,("H->cmd: %d\n", header->cmd));
-			TRACE(TRACE_LEVEL_PARSER,("H->data.resp: %d\n", header->data.resp));
+//			TRACE(("resp_len: %d\n", resp_len));
+//			TRACE(("H->preamble: %d\n", header->preamble));
+//			TRACE(("H->length: %d\n", header->length));
+//			TRACE(("H->cmd: %d\n", header->cmd));
+			TRACE(("H->data.resp: %d\n", header->data.resp));
 			free(resp);
 		}
 
@@ -800,17 +800,17 @@ void test_cmd_parser(char * test_name)
 
 		if (resp) {
 			struct comm_header * header = (struct comm_header *) resp;
-			TRACE(TRACE_LEVEL_PARSER,("resp_len: %d\n", resp_len));
-			TRACE(TRACE_LEVEL_PARSER,("H->preamble: %d\n", header->preamble));
-			TRACE(TRACE_LEVEL_PARSER,("H->length: %d\n", header->length));
-			TRACE(TRACE_LEVEL_PARSER,("H->cmd: %d\n", header->cmd));
-			TRACE(TRACE_LEVEL_PARSER,("H->data.resp: %d\n", header->data.resp));
+			TRACE(("resp_len: %d\n", resp_len));
+			TRACE(("H->preamble: %d\n", header->preamble));
+			TRACE(("H->length: %d\n", header->length));
+			TRACE(("H->cmd: %d\n", header->cmd));
+			TRACE(("H->data.resp: %d\n", header->data.resp));
 			if (resp_len > (int) sizeof(struct comm_header)) {
 				struct comm_prot_led_dev * dev_resp = (struct comm_prot_led_dev *) &resp[sizeof(struct comm_header)];
-				TRACE(TRACE_LEVEL_PARSER,("LED name: %s\n", dev_resp->name));
-				TRACE(TRACE_LEVEL_PARSER,("LED pattern: %d\n", dev_resp->pattern));
-				TRACE(TRACE_LEVEL_PARSER,("LED pin: %d\n", dev_resp->pin));
-				TRACE(TRACE_LEVEL_PARSER,("LED port: %c\n", dev_resp->port));
+				TRACE(("LED name: %s\n", dev_resp->name));
+				TRACE(("LED pattern: %d\n", dev_resp->pattern));
+				TRACE(("LED pin: %d\n", dev_resp->pin));
+				TRACE(("LED port: %c\n", dev_resp->port));
 			}
 			free(resp);
 		}
@@ -833,11 +833,11 @@ void test_cmd_parser(char * test_name)
 
 		if (resp) {
 			struct comm_header * header = (struct comm_header *) resp;
-			TRACE(TRACE_LEVEL_PARSER,("resp_len: %d\n", resp_len));
-			TRACE(TRACE_LEVEL_PARSER,("H->preamble: %d\n", header->preamble));
-			TRACE(TRACE_LEVEL_PARSER,("H->length: %d\n", header->length));
-			TRACE(TRACE_LEVEL_PARSER,("H->cmd: %d\n", header->cmd));
-			TRACE(TRACE_LEVEL_PARSER,("H->data.resp: %d\n", header->data.resp));
+			TRACE(("resp_len: %d\n", resp_len));
+			TRACE(("H->preamble: %d\n", header->preamble));
+			TRACE(("H->length: %d\n", header->length));
+			TRACE(("H->cmd: %d\n", header->cmd));
+			TRACE(("H->data.resp: %d\n", header->data.resp));
 			free(resp);
 		}
 	}
@@ -856,14 +856,14 @@ void test_cmd_parser(char * test_name)
 
 		if (resp) {
 			struct comm_header * header = (struct comm_header *) resp;
-			TRACE(TRACE_LEVEL_PARSER,("resp_len: %d\n", resp_len));
-			TRACE(TRACE_LEVEL_PARSER,("H->preamble: %d\n", header->preamble));
-			TRACE(TRACE_LEVEL_PARSER,("H->length: %d\n", header->length));
-			TRACE(TRACE_LEVEL_PARSER,("H->cmd: %d\n", header->cmd));
-			TRACE(TRACE_LEVEL_PARSER,("H->data.resp: %d\n", header->data.resp));
+			TRACE(("resp_len: %d\n", resp_len));
+			TRACE(("H->preamble: %d\n", header->preamble));
+			TRACE(("H->length: %d\n", header->length));
+			TRACE(("H->cmd: %d\n", header->cmd));
+			TRACE(("H->data.resp: %d\n", header->data.resp));
 			if (resp_len > (int) sizeof(struct comm_header)) {
 				struct comm_prot_led_module * mod_resp = (struct comm_prot_led_module *) &resp[sizeof(struct comm_header)];
-				TRACE(TRACE_LEVEL_PARSER,("LED mod->tick_ms:%d\n", mod_resp->tick_ms));
+				TRACE(("LED mod->tick_ms:%d\n", mod_resp->tick_ms));
 			}
 			free(resp);
 		}
@@ -885,11 +885,11 @@ void test_cmd_parser(char * test_name)
 
 		if (resp) {
 			struct comm_header * header = (struct comm_header *) resp;
-			TRACE(TRACE_LEVEL_PARSER,("resp_len: %d\n", resp_len));
-			TRACE(TRACE_LEVEL_PARSER,("H->preamble: %d\n", header->preamble));
-			TRACE(TRACE_LEVEL_PARSER,("H->length: %d\n", header->length));
-			TRACE(TRACE_LEVEL_PARSER,("H->cmd: %d\n", header->cmd));
-			TRACE(TRACE_LEVEL_PARSER,("H->data.resp: %d\n", header->data.resp));
+			TRACE(("resp_len: %d\n", resp_len));
+			TRACE(("H->preamble: %d\n", header->preamble));
+			TRACE(("H->length: %d\n", header->length));
+			TRACE(("H->cmd: %d\n", header->cmd));
+			TRACE(("H->data.resp: %d\n", header->data.resp));
 			free(resp);
 
 //			dev_timer_del(, &dev_timer_list);

@@ -29,4 +29,7 @@ GPIO_TypeDef * char_to_port(char cport);
 
 uint8_t pin_to_uint(uint16_t pin);
 
+uint8_t strbin2i(char* s);
+void u82strbin(uint8_t num, char* s);
+
 #endif /* COMMON_TOOLS_H_ */
