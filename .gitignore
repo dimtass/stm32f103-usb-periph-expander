@@ -123,6 +123,7 @@ dkms.conf
 
 # Visual Studio Code project file
 *.vscode
+vscode-bitbake-build/
 
 # Keil μVision
 *.uvgui.*

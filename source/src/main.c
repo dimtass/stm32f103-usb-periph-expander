@@ -68,6 +68,7 @@ int main(void)
 //			| TRACE_LEVEL_SPI
 //			| TRACE_LEVEL_USART
 			| TRACE_LEVEL_COMM
+			| TRACE_LEVEL_PARSER
 			,1);
 
 	/* USB Configuration */

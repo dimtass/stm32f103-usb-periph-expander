@@ -55,6 +55,7 @@ void* dev_led_probe(struct dev_led * led)
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	}
 	else if (new_led->port == GPIOC) {
+		TRACE(("GPIOC, %d, %b\n", new_led->pin, new_led->pattern));
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 	}
 

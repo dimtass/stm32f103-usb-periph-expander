@@ -48,7 +48,7 @@ void dev_uart_update(struct dev_uart_module * dev)
 					uart_it->uart_buff.rx_ready_tmr = 0;
 					uart_it->available = 1;
 					if (uart_it->fp_dev_uart_cb) {
-						uart_it->fp_dev_uart_cb(uart_it->uart_buff.rx_buffer, uart_it->uart_buff.rx_ptr_in, 0);
+						uart_it->fp_dev_uart_cb(uart_it, uart_it->uart_buff.rx_buffer, uart_it->uart_buff.rx_ptr_in);
 					}
 					/* reset RX */
 					uart_it->uart_buff.rx_ptr_in = 0;

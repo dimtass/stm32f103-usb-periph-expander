@@ -25,6 +25,7 @@ typedef enum {
 	TRACE_LEVEL_SPI = 		(1 << 5),
 	TRACE_LEVEL_USART = 	(1 << 6),
 	TRACE_LEVEL_COMM = 		(1 << 7),
+	TRACE_LEVEL_PARSER = 	(1 << 8),
 } en_trace_level;
 
 #define DEBUG_TRACE

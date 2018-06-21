@@ -59,29 +59,28 @@ extern LINE_CODING linecoding;
  */
 void DWT_Init(void)
 {
-  if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk))
-  {
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    DWT->CYCCNT = 0;
-    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-  }
+    if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)) {
+        CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+        DWT->CYCCNT = 0;
+        DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    }
 }
 
 uint32_t DWT_Get(void)
 {
-  return DWT->CYCCNT;
+    return DWT->CYCCNT;
 }
 
 __inline
 uint8_t DWT_Compare(int32_t tp)
 {
-  return (((int32_t)DWT_Get() - tp) < 0);
+    return (((int32_t)DWT_Get() - tp) < 0);
 }
 
 void DWT_Delay(uint32_t us) // microseconds
 {
-  int32_t tp = DWT_Get() + us * (SystemCoreClock/1000000);
-  while (((int32_t)DWT_Get() - tp) < 0);
+    int32_t tp = DWT_Get() + us * (SystemCoreClock/1000000);
+    while (((int32_t)DWT_Get() - tp) < 0);
 }
 
 
@@ -90,8 +89,8 @@ void DWT_Delay(uint32_t us) // microseconds
  */
 void BKP_Configuration(void)
 {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-	PWR_BackupAccessCmd(ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+    PWR_BackupAccessCmd(ENABLE);
 }
 
 
@@ -100,12 +99,12 @@ void BKP_Configuration(void)
  */
 void IWDG_Configuration(void)
 {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
-	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
-	IWDG_SetPrescaler(IWDG_Prescaler_32);
-	IWDG_SetReload(1250*10);
-	IWDG_ReloadCounter();
-	IWDG_Enable();
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
+    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+    IWDG_SetPrescaler(IWDG_Prescaler_32);
+    IWDG_SetReload(1250*10);
+    IWDG_ReloadCounter();
+    IWDG_Enable();
 }
 
 /*******************************************************************************
@@ -116,8 +115,8 @@ void IWDG_Configuration(void)
 *******************************************************************************/
 void Enter_LowPowerMode(void)
 {
-  /* Set the device state to suspend */
-  bDeviceState = SUSPENDED;
+    /* Set the device state to suspend */
+    bDeviceState = SUSPENDED;
 }
 
 /*******************************************************************************
@@ -128,20 +127,18 @@ void Enter_LowPowerMode(void)
 *******************************************************************************/
 void Leave_LowPowerMode(void)
 {
-  DEVICE_INFO *pInfo = &Device_Info;
+    DEVICE_INFO *pInfo = &Device_Info;
 
-  /* Set the device state to the correct state */
-  if (pInfo->Current_Configuration != 0)
-  {
-    /* Device configured */
-    bDeviceState = CONFIGURED;
-  }
-  else
-  {
-    bDeviceState = ATTACHED;
-  }
+    /* Set the device state to the correct state */
+    if (pInfo->Current_Configuration != 0) {
+        /* Device configured */
+        bDeviceState = CONFIGURED;
+    }
+    else {
+        bDeviceState = ATTACHED;
+    }
     /*Enable SystemCoreClock*/
-  SystemInit();
+    SystemInit();
 }
 
 /*******************************************************************************
@@ -153,19 +150,18 @@ void Leave_LowPowerMode(void)
 *******************************************************************************/
 void Get_SerialNum(void)
 {
-  uint32_t Device_Serial0, Device_Serial1, Device_Serial2;
+    uint32_t Device_Serial0, Device_Serial1, Device_Serial2;
 
-  Device_Serial0 = *(uint32_t*)ID1;
-  Device_Serial1 = *(uint32_t*)ID2;
-  Device_Serial2 = *(uint32_t*)ID3;
- 
-  Device_Serial0 += Device_Serial2;
+    Device_Serial0 = *(uint32_t*)ID1;
+    Device_Serial1 = *(uint32_t*)ID2;
+    Device_Serial2 = *(uint32_t*)ID3;
 
-  if (Device_Serial0 != 0)
-  {
-    IntToUnicode (Device_Serial0, &Virtual_Com_Port_StringSerial[2] , 8);
-    IntToUnicode (Device_Serial1, &Virtual_Com_Port_StringSerial[18], 4);
-  }
+    Device_Serial0 += Device_Serial2;
+
+    if (Device_Serial0 != 0) {
+        IntToUnicode (Device_Serial0, &Virtual_Com_Port_StringSerial[2] , 8);
+        IntToUnicode (Device_Serial1, &Virtual_Com_Port_StringSerial[18], 4);
+    }
 }
 
 /*******************************************************************************
@@ -177,86 +173,83 @@ void Get_SerialNum(void)
 *******************************************************************************/
 static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len)
 {
-  uint8_t idx = 0;
-  
-  for( idx = 0 ; idx < len ; idx ++)
-  {
-    if( ((value >> 28)) < 0xA )
-    {
-      pbuf[ 2* idx] = (value >> 28) + '0';
+    uint8_t idx = 0;
+
+    for( idx = 0 ; idx < len ; idx ++) {
+        if( ((value >> 28)) < 0xA ) {
+            pbuf[ 2* idx] = (value >> 28) + '0';
+        }
+        else {
+            pbuf[2* idx] = (value >> 28) + 'A' - 10; 
+        }
+        
+        value = value << 4;
+        
+        pbuf[ 2* idx + 1] = 0;
     }
-    else
-    {
-      pbuf[2* idx] = (value >> 28) + 'A' - 10; 
-    }
-    
-    value = value << 4;
-    
-    pbuf[ 2* idx + 1] = 0;
-  }
 }
 
 void RCC_Configuration(void)
 {
-	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC2, ENABLE);
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div8);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC2, ENABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 }
 
 void NVIC_Configuration(void)
 {
-	NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
 
-	/* Enable the TIM3 global Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    /* Enable the TIM3 global Interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
-	/* Configure and enable ADC interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    /* Configure and enable ADC interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 void USB_Configuration(void)
 {
-	NVIC_InitTypeDef NVIC_InitStructure;
-	EXTI_InitTypeDef EXTI_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    EXTI_InitTypeDef EXTI_InitStructure;
 
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 
-	/* Select USBCLK source */
-	RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
+    /* Select USBCLK source */
+    RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
 
-	/* Enable the USB clock */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
+    /* Enable the USB clock */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
 
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-	NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
-	/* Enable the USB Wake-up interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = USBWakeUp_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_Init(&NVIC_InitStructure);
+    /* Enable the USB Wake-up interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = USBWakeUp_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_Init(&NVIC_InitStructure);
 
-	/* Configure the EXTI line 18 connected internally to the USB IP */
-	EXTI_ClearITPendingBit(EXTI_Line18);
-	EXTI_InitStructure.EXTI_Line = EXTI_Line18;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitStructure);
+    /* Configure the EXTI line 18 connected internally to the USB IP */
+    EXTI_ClearITPendingBit(EXTI_Line18);
+    EXTI_InitStructure.EXTI_Line = EXTI_Line18;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTI_InitStructure);
 }
 

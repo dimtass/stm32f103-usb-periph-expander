@@ -40,7 +40,7 @@ struct dev_uart_module {
 	struct list_head uart_list;
 };
 
-#define DECLARE_UART_DEV(NAME, OWNER, PORT, BAUDRATE, BUFFER_SIZE, TIMEOUT_MS, DEBUG) \
+#define DECLARE_UART_DEV(NAME, OWNER, PORT, BAUDRATE, BUFFER_SIZE, TIMEOUT_MS, DEBUG, CALLBACK) \
 	struct dev_uart NAME = { \
 		.owner = OWNER, \
 		.port = PORT, \
@@ -58,7 +58,7 @@ struct dev_uart_module {
 		}, \
 		.timeout_ms = TIMEOUT_MS, \
 		.debug = DEBUG, \
-		.fp_dev_uart_cb = NULL, \
+		.fp_dev_uart_cb = CALLBACK, \
 	}
 
 /**
@@ -78,7 +78,7 @@ struct dev_uart {
 	* @param[in] buffer Pointer to the RX buffer
 	* @param[in] bufferlen The length of the received data
 	*/
-	void (*fp_dev_uart_cb)(uint8_t *buffer, size_t bufferlen, uint8_t sender);
+	void (*fp_dev_uart_cb)(struct dev_uart * uart, uint8_t *buffer, size_t bufferlen);
 	struct list_head list;
 };
 

@@ -7,13 +7,15 @@
 
 #include "platform_devices.h"
 
+#define DEBUG_STM32F103
+
 const char dev_type_names[][20] = {
-	[DEV_TYPE_LED] = "DEV_LED",
-	[DEV_TYPE_GPIO] = "DEV_GPIO",
-	[DEV_TYPE_UART] = "DEV_UART",
-	[DEV_TYPE_ADC] = "DEV_ADC",
-	[DEV_TYPE_SPI] = "DEV_SPI",
-	[DEV_TYPE_I2C] = "DEV_I2C",
+	[DEV_TYPE_LED] = "LED",
+	[DEV_TYPE_GPIO] = "GPIO",
+	[DEV_TYPE_UART] = "UART",
+	[DEV_TYPE_ADC] = "ADC",
+	[DEV_TYPE_SPI] = "SPI",
+	[DEV_TYPE_I2C] = "I2C",
 };
 
 struct platform_device {
@@ -23,20 +25,16 @@ struct platform_device {
 	struct list_head list;
 };
 
-struct platform_sys {
-
-};
-
 static LIST_HEAD(platform_dev_list);
 
 static LIST_HEAD(dev_timer_list);
 
 
-int cmd_parser(uint8_t * buffer, uint16_t buffer_len, uint8_t ** resp_p);
+// int cmd_parser(uint8_t * buffer, uint16_t buffer_len, uint8_t ** resp_p);
 void usb_0_rx_parser(uint8_t * recv_buffer, uint16_t recv_len);
 void usb_1_rx_parser(uint8_t * recv_buffer, uint16_t recv_len);
-void uart1_rx_parser(uint8_t *buffer, size_t bufferlen, uint8_t sender);
-void uart2_rx_parser(uint8_t *buffer, size_t bufferlen, uint8_t sender);
+void uart1_rx_parser(struct dev_uart * uart, uint8_t *buffer, size_t bufferlen);
+void uart2_rx_parser(struct dev_uart * uart, uint8_t *buffer, size_t bufferlen);
 
 #define UART_BUFFER_SIZE	512
 
@@ -63,7 +61,7 @@ DECLARE_MODULE_UART(uart_module, 1);
 
 /* Declare the led master and by default a status led on pin B.13 */
 DECLARE_MODULE_LED(led_module, 250);
-//DECLARE_DEV_LED(led_status, PORT_STATUS_LED, PIN_STATUS_LED, &led_module);
+DECLARE_DEV_LED(led_status, PORT_STATUS_LED, PIN_STATUS_LED, &led_module);
 
 /* Declare GPIOs */
 
@@ -125,8 +123,8 @@ struct dev_adc adc_ch[] = {
 
 DECLARE_SPI_CHANNEL(spi_ch1, NULL, 1);
 
-DECLARE_UART_DEV(dbg_uart, NULL, USART1, 115200, 1024, 10, 1);
-DECLARE_UART_DEV(dbg_uart2, NULL, USART2, 115200, 512, 10, 1);
+DECLARE_UART_DEV(dbg_uart, NULL, USART1, 115200, 1024, 10, 1, uart1_rx_parser);
+DECLARE_UART_DEV(dbg_uart2, NULL, USART2, 115200, 512, 10, 1, NULL);
 
 #endif
 
@@ -275,8 +273,8 @@ void platform_dev_init(void)
 	dev_led_module_init(&led_module);
 	dev_timer_add((void*) &led_module, led_module.tick_ms, (void*) &dev_led_update, &dev_timer_list);
 
-//	platform_dev_probe("LED.C13", DEV_TYPE_LED, (void*) &led_status);
-//	dev_led_set_pattern(&led_status, LED_PATTERN_IDLE);
+	// platform_dev_probe("LED.C13", DEV_TYPE_LED, (void*) &led_status);
+	// dev_led_set_pattern(&led_status, LED_PATTERN_IDLE);
 
 
 	/* Initialize GPIOs */
@@ -315,8 +313,8 @@ void platform_dev_init(void)
 
 	dev_timer_add((void*) &uart_module, uart_module.tick_ms, (void*) &dev_uart_update, &dev_timer_list);
 
-	test_cmd_parser("LED_DEV_ADD");
-	test_cmd_parser("LED_DEV_REMOVE");
+//	test_cmd_parser("LED_DEV_ADD");
+// 	test_cmd_parser("LED_DEV_REMOVE");
 //	test_cmd_parser("LED_DEV_ADD");
 }
 
@@ -339,73 +337,47 @@ void platform_dev_polling(void)
 	GPIOB->ODR ^= GPIO_Pin_11;
 }
 
-
-void usb_0_rx_parser(uint8_t * recv_buffer, uint16_t recv_len)
-{
-	TRACE(("USB0_recv: %d\n", recv_len));
-	uint8_t * resp_buff_p = NULL;
-	int resp_len = cmd_parser(recv_buffer, recv_len, &resp_buff_p);
-	if (resp_len && resp_buff_p) {
-		USB_dev_send(&usb_comm_0, resp_buff_p, resp_len);
-		TRACE(("USB0_send: %d\n", resp_len));
-	}
-	/* clean up */
-	if (resp_buff_p) {
-		free(resp_buff_p);
-		resp_buff_p = NULL;
-	}
-}
-
-
-void usb_1_rx_parser(uint8_t * recv_buffer, uint16_t recv_len)
-{
-	int resp_len = 0;
-	TRACE(("USB1: %s\n", recv_buffer));
-	TRACE(("USB1_recv: %d\n", recv_len));
-	TRACE(("USB1_send: %d\n", resp_len));
-}
-
+#ifdef BINARY_COMMS
 /**
  * I've created a cmd_parser.inc file for the parsing functions
  * to make easier to read code.
  */
 #include "cmd_parser.inc"
+#else
+
+enum {
+	SENDER_USB0,
+	SENDER_USB1,
+	SENDER_UART1,
+	SENDER_UART2
+};
 
 
-void uart1_rx_parser(uint8_t *buffer, size_t bufferlen, uint8_t sender)
+#include "text_cmd_parser.inc"
+
+void usb_0_rx_parser(uint8_t * recv_buffer, uint16_t recv_len)
 {
-	uint8_t resp_code = CMD_PARSER_OK;
-	uint16_t packet_len = sizeof(struct comm_header) + sizeof(uint16_t) + sizeof(bufferlen);
-	uint8_t * out_buffer = NULL;
-
-	struct comm_header * header = (struct comm_header*) out_buffer;
-	header->cmd = COMM_CMD_READ;
-	packet_len = cmd_create_resp(&out_buffer, header->cmd | COMM_CMD_RESP, DEV_TYPE_UART, resp_code, packet_len);
-
-	uint16_t * out_data_size = (uint16_t*) &out_buffer[sizeof(struct comm_header)];
-	*out_data_size = bufferlen;
-	uint8_t * out_data = (uint8_t*) &out_buffer[sizeof(struct comm_header) + sizeof(uint16_t)];
-	memcpy(out_data, buffer, bufferlen);
-	USB_dev_send(&usb_comm_0, out_buffer, bufferlen);
-	free(out_buffer);
+	TRACE(("USB0_recv: %d\n", recv_len));
 }
 
 
-void uart2_rx_parser(uint8_t *buffer, size_t bufferlen, uint8_t sender)
+void usb_1_rx_parser(uint8_t * recv_buffer, uint16_t recv_len)
 {
-	uint8_t resp_code = CMD_PARSER_OK;
-	uint16_t packet_len = sizeof(struct comm_header) + sizeof(uint16_t) + sizeof(bufferlen);
-	uint8_t * out_buffer = NULL;
-
-	struct comm_header * header = (struct comm_header*) out_buffer;
-	header->cmd = COMM_CMD_READ;
-	packet_len = cmd_create_resp(&out_buffer, header->cmd | COMM_CMD_RESP, DEV_TYPE_UART, resp_code, packet_len);
-
-	uint16_t * out_data_size = (uint16_t*) &out_buffer[sizeof(struct comm_header)];
-	*out_data_size = bufferlen;
-	uint8_t * out_data = (uint8_t*) &out_buffer[sizeof(struct comm_header) + sizeof(uint16_t)];
-	memcpy(out_data, buffer, bufferlen);
-	USB_dev_send(&usb_comm_0, out_buffer, bufferlen);
-	free(out_buffer);
+	TRACE(("USB1_recv: %d\n", recv_len));
 }
 
+
+
+void uart1_rx_parser(struct dev_uart * uart, uint8_t *buffer, size_t bufferlen)
+{
+	text_cmd_parser(buffer, bufferlen, SENDER_UART1, (void*) uart);
+}
+
+
+void uart2_rx_parser(struct dev_uart * uart, uint8_t *buffer, size_t SENDER_UART2)
+{
+
+}
+
+
+#endif

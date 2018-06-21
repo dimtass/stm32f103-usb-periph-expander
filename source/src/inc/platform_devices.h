@@ -22,8 +22,6 @@
 #include "comm_protocol.h"
 #include "common_tools.h"
 
-#define DEBUG_STM32F103
-
 void platform_dev_init(void);
 
 void platform_dev_polling(void);
