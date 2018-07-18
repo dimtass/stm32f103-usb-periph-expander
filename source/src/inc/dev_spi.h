@@ -39,8 +39,12 @@ struct dev_spi {
 	uint16_t		nss;
 	DMA_Channel_TypeDef * dma_tx_ch;
 	uint32_t		dma_tx_flags;
+	uint32_t		dma_tx_iqrn;
 	DMA_Channel_TypeDef * dma_rx_ch;
 	uint32_t		dma_rx_flags;
+	uint32_t		dma_rx_iqrn;
+	DMA_InitTypeDef dma_struct;
+	SPI_InitTypeDef spi_struct;
 	struct list_head list;
 };
 
@@ -54,16 +58,27 @@ struct dev_spi_module {
 	struct list_head list;
 };
 
+/* Init functions */
 void dev_spi_init(struct dev_spi_module * dev);
-
 void* dev_spi_probe(struct dev_spi * spi);
-
 void dev_spi_remove(struct dev_spi * spi);
 
-int dev_spi_send(struct dev_spi * spi, uint8_t * data, size_t data_len);
+/* Control functions */
+void dev_spi_start(struct dev_spi * spi);
+void dev_spi_stop(struct dev_spi * spi);
+void dev_spi_wait(struct dev_spi * spi);
+void dev_spi_set8(struct dev_spi * spi);
+void dev_spi_set16(struct dev_spi * spi);
 
-int dev_spi_recv(struct dev_spi * spi, uint8_t * data, size_t data_len);
+/* 8-bit send/receive functions */
+void dev_spi_send8(struct dev_spi * spi, uint8_t * data, size_t data_len);
+void dev_spi_sendCircular8(struct dev_spi * spi, uint8_t * data, size_t data_len);
+void dev_spi_recv8(struct dev_spi * spi, uint8_t * data, size_t data_len);
+void dev_spi_recvCircular8(struct dev_spi * spi, uint8_t * data, size_t data_len);
 
-uint16_t dev_spi_send_recv(struct dev_spi * spi, uint8_t * data_out, uint16_t data_out_len, uint8_t * data_in, uint16_t data_in_len);
-
+/* 16-bit functions */
+void dev_spi_send16(struct dev_spi * spi, uint16_t *data, size_t data_len);
+void dev_spi_sendCircular16(struct dev_spi * spi, uint16_t *data, size_t data_len);
+void dev_spi_recv16(struct dev_spi * spi, uint8_t * data, size_t data_len);
+void dev_spi_recvCircular16(struct dev_spi * spi, uint8_t * data, size_t data_len);
 #endif /* DEV_SPI_H_ */
