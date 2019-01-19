@@ -323,15 +323,7 @@ void platform_dev_polling(void)
 {
 	USB_update_timers();	// update USB timers
 
-	if (!list_empty(&dev_timer_list)) {
-		struct dev_timer * tmr_it = NULL;
-		list_for_each_entry(tmr_it, &dev_timer_list, list) {
-			if ((++tmr_it->counter) >= tmr_it->timeout_ms) {
-				tmr_it->counter = 0;
-				tmr_it->fp_timeout_cb(tmr_it->parent);
-			}
-		}
-	}
+	dev_timer_polling(&dev_timer_list);
 
 	IWDG_ReloadCounter();
 	GPIOB->ODR ^= GPIO_Pin_11;

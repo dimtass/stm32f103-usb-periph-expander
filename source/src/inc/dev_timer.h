@@ -66,4 +66,17 @@ static inline void dev_timer_del(struct dev_timer * timer, struct list_head * ti
 	}
 }
 
+static inline void dev_timer_polling(struct list_head * timer_list)
+{
+	if (!list_empty(timer_list)) {
+		struct dev_timer * tmr_it = NULL;
+		list_for_each_entry(tmr_it, timer_list, list) {
+			if ((++tmr_it->counter) >= tmr_it->timeout_ms) {
+				tmr_it->counter = 0;
+				tmr_it->fp_timeout_cb(tmr_it->parent);
+			}
+		}
+	}
+}
+
 #endif /* DEV_TIMER_H_ */
